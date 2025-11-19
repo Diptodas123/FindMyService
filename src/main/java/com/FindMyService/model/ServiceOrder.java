@@ -1,6 +1,8 @@
 package com.FindMyService.model;
 
 import com.FindMyService.model.enums.OrderStatus;
+import com.FindMyService.model.enums.PaymentMethod;
+import com.FindMyService.model.enums.PaymentStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.*;
@@ -46,6 +48,22 @@ public class ServiceOrder {
     @DecimalMin(value = "0.0", inclusive = false, message = "Cost must be greater than 0")
     private BigDecimal totalCost;
 
+    @Column(length = 256)
+    private String transactionId;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentMethod paymentMethod;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus;
+
+    @Column(precision = 8, scale = 2)
+    private BigDecimal paymentAmount;
+
+    @Column(length = 3)
+    private String paymentCurrency;
+
+    private Instant paymentDate;
     private Instant createdAt;
     private Instant updatedAt;
 }

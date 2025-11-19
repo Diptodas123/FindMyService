@@ -28,10 +28,6 @@ public class User {
     @Size(max = 100)
     private String email;
 
-    @Pattern(
-            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
-            message = "Password must contain 1 uppercase, 1 lowercase, 1 number, 1 special character"
-    )
     @NotBlank(message = "Password is required")
     private String password;
 
@@ -40,7 +36,20 @@ public class User {
     private Role role;
 
     private String phone;
-    private String address;
+
+    @NonNull
+    private String addressLine1;
+
+    private String addressLine2;
+
+    @NonNull
+    private String city;
+
+    @NonNull
+    private String state;
+
+    @NonNull
+    private String zipCode;
     private Instant createdAt;
     private String profilePictureUrl;
 }

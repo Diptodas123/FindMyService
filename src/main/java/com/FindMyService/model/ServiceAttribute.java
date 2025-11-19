@@ -1,6 +1,7 @@
 package com.FindMyService.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
 import java.time.Instant;
@@ -27,6 +28,10 @@ public class ServiceAttribute {
     private String attributeValue;
 
     @Column(length = 60)
+    @Pattern(
+            regexp = "^(string|integer|float|boolean|date|enum)$",
+            message = "valueType must be one of: string, integer, float, boolean, date, enum"
+    )
     private String valueType;
 
     private Instant createdAt;
