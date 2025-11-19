@@ -2,7 +2,6 @@ package com.FindMyService.model;
 
 import com.FindMyService.model.enums.OrderStatus;
 import com.FindMyService.model.enums.PaymentMethod;
-import com.FindMyService.model.enums.PaymentStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.*;
