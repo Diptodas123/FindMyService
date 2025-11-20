@@ -1,24 +1,29 @@
 package com.FindMyService.service;
 
 import com.FindMyService.model.Rating;
+import com.FindMyService.repository.RatingRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class RatingService {
 
+    private final RatingRepository ratingRepository;
+
+    public RatingService(RatingRepository ratingRepository) {
+        this.ratingRepository = ratingRepository;
+    }
+
     public List<Rating> getAllRatings() {
-        return Collections.emptyList();
+        return ratingRepository.findAll();
     }
 
     public Optional<Rating> getRatingById(String ratingId) {
-        return Optional.empty();
+        return ratingRepository.findById(ratingId);
     }
 
     public Rating postRating(Rating rating) {
-        return rating;
+        return ratingRepository.save(rating);
     }
 }

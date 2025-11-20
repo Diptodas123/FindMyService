@@ -46,12 +46,12 @@ public class OrderController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable String orderId) {
+    public ResponseEntity<String> deleteOrder(@PathVariable String orderId) {
         boolean orderToDelete = orderService.deleteOrder(orderId);
         if (orderToDelete) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok("Order deleted successfully.");
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found with id: " + orderId);
     }
 
     @PostMapping("/{orderId}/pay")
