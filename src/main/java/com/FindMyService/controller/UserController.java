@@ -39,14 +39,14 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<User> updateUser(@PathVariable String userId, @RequestBody User user) {
+    public ResponseEntity<User> updateUser(@PathVariable Long userId, @RequestBody User user) {
         return userService.updateUser(userId, user)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable String userId) {
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
         boolean userToDelete = userService.deleteUser(userId);
         if (userToDelete) {
             return ResponseEntity.noContent().build();

@@ -47,10 +47,10 @@ public class ProviderController {
     }
 
     @DeleteMapping("/{providerId}")
-    public ResponseEntity<Void> deleteProvider(@PathVariable String providerId) {
+    public ResponseEntity<String> deleteProvider(@PathVariable String providerId) {
         boolean providerToDelete = providerService.deleteProvider(providerId);
         if (providerToDelete) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok("Provider deleted successfully.");
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
