@@ -11,12 +11,12 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "service_orders")
+@Table(name = "orders")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ServiceOrder {
+public class Order {
     @Id
     @Column(length = 64)
     private String orderId;
