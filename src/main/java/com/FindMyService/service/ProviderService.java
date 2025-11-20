@@ -19,7 +19,7 @@ public class ProviderService {
         return providerRepository.findAll();
     }
 
-    public Optional<Provider> getProviderById(String providerId) {
+    public Optional<Provider> getProviderById(Long providerId) {
         return providerRepository.findById(providerId);
     }
 
@@ -27,7 +27,7 @@ public class ProviderService {
         return providerRepository.save(provider);
     }
 
-    public Optional<Provider> updateProvider(String providerId, Provider provider) {
+    public Optional<Provider> updateProvider(Long providerId, Provider provider) {
         Provider existingProvider = providerRepository.findById(providerId).orElse(null);
         if (existingProvider == null) {
             return Optional.empty();
@@ -37,7 +37,7 @@ public class ProviderService {
         return Optional.of(updatedProvider);
     }
 
-    public boolean deleteProvider(String providerId) {
+    public boolean deleteProvider(Long providerId) {
         return providerRepository.findById(providerId).map(provider -> {
             providerRepository.delete(provider);
             return true;

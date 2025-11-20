@@ -23,7 +23,7 @@ public class ServiceController {
     }
 
     @GetMapping("/{serviceId}")
-    public ResponseEntity<Service> getService(@PathVariable String serviceId) {
+    public ResponseEntity<Service> getService(@PathVariable Long serviceId) {
         return serviceCatalogService.getServiceById(serviceId)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
@@ -39,14 +39,14 @@ public class ServiceController {
     }
 
     @PutMapping("/{serviceId}")
-    public ResponseEntity<Service> updateService(@PathVariable String serviceId, @RequestBody Service service) {
+    public ResponseEntity<Service> updateService(@PathVariable Long serviceId, @RequestBody Service service) {
         return serviceCatalogService.updateService(serviceId, service)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteService(@PathVariable String serviceId) {
+    public ResponseEntity<Void> deleteService(@PathVariable Long serviceId) {
         boolean serviceToDelete = serviceCatalogService.deleteService(serviceId);
         if (serviceToDelete) {
             return ResponseEntity.noContent().build();

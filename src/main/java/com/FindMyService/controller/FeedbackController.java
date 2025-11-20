@@ -23,7 +23,7 @@ public class FeedbackController {
     }
 
     @GetMapping("/{feedbackId}")
-    public ResponseEntity<Feedback> getFeedback(@PathVariable String feedbackId) {
+    public ResponseEntity<Feedback> getFeedback(@PathVariable Long feedbackId) {
         return feedbackService.getFeedbackById(feedbackId)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());

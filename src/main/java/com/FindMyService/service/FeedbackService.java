@@ -19,7 +19,7 @@ public class FeedbackService {
         return feedbackRepository.findAll();
     }
 
-    public Optional<Feedback> getFeedbackById(String feedbackId) {
+    public Optional<Feedback> getFeedbackById(Long feedbackId) {
         return feedbackRepository.findById(feedbackId);
     }
 

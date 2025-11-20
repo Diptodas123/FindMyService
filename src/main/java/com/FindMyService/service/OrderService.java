@@ -19,7 +19,7 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
-    public Optional<Order> getOrderById(String orderId) {
+    public Optional<Order> getOrderById(Long orderId) {
         return orderRepository.findById(orderId);
     }
 
@@ -27,7 +27,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    public Optional<Order> updateOrder(String orderId, Order order) {
+    public Optional<Order> updateOrder(Long orderId, Order order) {
         Order existingOrder = orderRepository.findById(orderId).orElse(null);
         if (existingOrder == null) {
             return Optional.empty();
@@ -37,14 +37,14 @@ public class OrderService {
         return Optional.of(updatedOrder);
     }
 
-    public boolean deleteOrder(String orderId) {
+    public boolean deleteOrder(Long orderId) {
         return orderRepository.findById(orderId).map(order -> {
             orderRepository.delete(order);
             return true;
         }).orElse(false);
     }
 
-    public boolean payOrder(String orderId) {       // todo
+    public boolean payOrder(Long orderId) {       // todo
         // placeholder for initiating/recording payment
         return false;
     }

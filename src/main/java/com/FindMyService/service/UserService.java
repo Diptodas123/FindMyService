@@ -19,7 +19,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public Optional<User> getUserById(String userId) {
+    public Optional<User> getUserById(Long userId) {
         return userRepository.findById(userId);
     }
 
@@ -28,7 +28,7 @@ public class UserService {
     }
 
     public Optional<User> updateUser(Long userId, User user) {
-        User existingUser = userRepository.findById(String.valueOf(userId)).orElse(null);
+        User existingUser = userRepository.findById(userId).orElse(null);
         if (existingUser == null) {
             return Optional.empty();
         }
@@ -38,7 +38,7 @@ public class UserService {
     }
 
     public boolean deleteUser(Long userId) {
-        return userRepository.findById(String.valueOf(userId)).map(user -> {
+        return userRepository.findById(userId).map(user -> {
             userRepository.delete(user);
             return true;
         }).orElse(false);
