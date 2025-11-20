@@ -19,7 +19,7 @@ public class RatingService {
         return ratingRepository.findAll();
     }
 
-    public Optional<Rating> getRatingById(String ratingId) {
+    public Optional<Rating> getRatingById(Long ratingId) {
         return ratingRepository.findById(ratingId);
     }
 

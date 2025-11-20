@@ -18,7 +18,7 @@ public class ServiceCatalogService {
         return serviceCatalogRepository.findAll();
     }
 
-    public Optional<com.FindMyService.model.Service> getServiceById(String serviceId) {
+    public Optional<com.FindMyService.model.Service> getServiceById(Long serviceId) {
         return serviceCatalogRepository.findById(serviceId);
     }
 
@@ -26,7 +26,7 @@ public class ServiceCatalogService {
         return serviceCatalogRepository.save(service);
     }
 
-    public Optional<com.FindMyService.model.Service> updateService(String serviceId, com.FindMyService.model.Service service) {
+    public Optional<com.FindMyService.model.Service> updateService(Long serviceId, com.FindMyService.model.Service service) {
         com.FindMyService.model.Service existingService = serviceCatalogRepository.findById(serviceId).orElse(null);
         if (existingService == null) {
             return Optional.empty();
@@ -36,7 +36,7 @@ public class ServiceCatalogService {
         return Optional.of(updatedService);
     }
 
-    public boolean deleteService(String serviceId) {
+    public boolean deleteService(Long serviceId) {
         return serviceCatalogRepository.findById(serviceId).map(service -> {
             serviceCatalogRepository.delete(service);
             return true;
