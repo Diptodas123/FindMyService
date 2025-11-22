@@ -1,5 +1,6 @@
 package com.FindMyService.service;
 
+import com.FindMyService.model.ServiceCatalog;
 import com.FindMyService.repository.ServiceCatalogRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -14,25 +15,25 @@ public class ServiceCatalogService {
         this.serviceCatalogRepository = serviceCatalogRepository;
     }
 
-    public List<com.FindMyService.model.Service> getAllServices() {
+    public List<ServiceCatalog> getAllServices() {
         return serviceCatalogRepository.findAll();
     }
 
-    public Optional<com.FindMyService.model.Service> getServiceById(Long serviceId) {
+    public Optional<ServiceCatalog> getServiceById(Long serviceId) {
         return serviceCatalogRepository.findById(serviceId);
     }
 
-    public com.FindMyService.model.Service createService(com.FindMyService.model.Service service) {
+    public ServiceCatalog createService(ServiceCatalog service) {
         return serviceCatalogRepository.save(service);
     }
 
-    public Optional<com.FindMyService.model.Service> updateService(Long serviceId, com.FindMyService.model.Service service) {
-        com.FindMyService.model.Service existingService = serviceCatalogRepository.findById(serviceId).orElse(null);
+    public Optional<ServiceCatalog> updateService(Long serviceId, ServiceCatalog service) {
+        ServiceCatalog existingService = serviceCatalogRepository.findById(serviceId).orElse(null);
         if (existingService == null) {
             return Optional.empty();
         }
         service.setServiceId(serviceId);
-        com.FindMyService.model.Service updatedService = serviceCatalogRepository.save(service);
+        ServiceCatalog updatedService = serviceCatalogRepository.save(service);
         return Optional.of(updatedService);
     }
 
