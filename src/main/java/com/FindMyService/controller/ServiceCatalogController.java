@@ -47,6 +47,7 @@ public class ServiceCatalogController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteService(@PathVariable Long serviceId) {
+    public ResponseEntity<Void> deleteService(@PathVariable Long serviceId) {
         boolean serviceToDelete = serviceCatalogService.deleteService(serviceId);
         if (serviceToDelete) {
             return ResponseEntity.noContent().build();

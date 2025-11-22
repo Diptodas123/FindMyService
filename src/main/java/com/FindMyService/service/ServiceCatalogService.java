@@ -15,6 +15,12 @@ public class ServiceCatalogService {
         this.serviceCatalogRepository = serviceCatalogRepository;
     }
 
+    private final ServiceCatalogRepository serviceCatalogRepository;
+
+    public ServiceCatalogService(ServiceCatalogRepository serviceCatalogRepository) {
+        this.serviceCatalogRepository = serviceCatalogRepository;
+    }
+
     public List<ServiceCatalog> getAllServices() {
         return serviceCatalogRepository.findAll();
     }
