@@ -24,15 +24,15 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_id", nullable = false)
-    private Long serviceId;
+    private ServiceCatalog serviceId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ordered_by_user_id", nullable = false)
-    private Long UserId;
+    private User UserId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "provider_id", nullable = false)
-    private Long providerId;
+    private Provider providerId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)

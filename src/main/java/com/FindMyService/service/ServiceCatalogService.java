@@ -1,31 +1,46 @@
 package com.FindMyService.service;
 
+import com.FindMyService.model.ServiceCatalog;
+import com.FindMyService.repository.ServiceCatalogRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ServiceCatalogService {
 
-    public List<com.FindMyService.model.Service> getAllServices() {
-        return Collections.emptyList();
+    private final ServiceCatalogRepository serviceCatalogRepository;
+
+    public ServiceCatalogService(ServiceCatalogRepository serviceCatalogRepository) {
+        this.serviceCatalogRepository = serviceCatalogRepository;
     }
 
-    public Optional<com.FindMyService.model.Service> getServiceById(String serviceId) {
-        return Optional.empty();
+    public List<ServiceCatalog> getAllServices() {
+        return serviceCatalogRepository.findAll();
     }
 
-    public com.FindMyService.model.Service createService(com.FindMyService.model.Service service) {
-        return service;
+    public Optional<ServiceCatalog> getServiceById(Long serviceId) {
+        return serviceCatalogRepository.findById(serviceId);
     }
 
-    public Optional<com.FindMyService.model.Service> updateService(String serviceId, com.FindMyService.model.Service service) {
-        return Optional.empty();
+    public ServiceCatalog createService(ServiceCatalog service) {
+        return serviceCatalogRepository.save(service);
     }
 
-    public boolean deleteService(String serviceId) {
-        return false;
+    public Optional<ServiceCatalog> updateService(Long serviceId, ServiceCatalog service) {
+        ServiceCatalog existingService = serviceCatalogRepository.findById(serviceId).orElse(null);
+        if (existingService == null) {
+            return Optional.empty();
+        }
+        service.setServiceId(serviceId);
+        ServiceCatalog updatedService = serviceCatalogRepository.save(service);
+        return Optional.of(updatedService);
+    }
+
+    public boolean deleteService(Long serviceId) {
+        return serviceCatalogRepository.findById(serviceId).map(service -> {
+            serviceCatalogRepository.delete(service);
+            return true;
+        }).orElse(false);
     }
 }

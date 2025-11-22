@@ -23,7 +23,7 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<Order> getOrderById(@PathVariable String orderId) {
+    public ResponseEntity<Order> getOrderById(@PathVariable Long orderId) {
         return orderService.getOrderById(orderId)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
@@ -39,23 +39,23 @@ public class OrderController {
     }
 
     @PutMapping("/{orderId}")
-    public ResponseEntity<Order> updateOrder(@PathVariable String orderId, @RequestBody Order order) {
+    public ResponseEntity<Order> updateOrder(@PathVariable Long orderId, @RequestBody Order order) {
         return orderService.updateOrder(orderId, order)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable String orderId) {
+    public ResponseEntity<String> deleteOrder(@PathVariable Long orderId) {
         boolean orderToDelete = orderService.deleteOrder(orderId);
         if (orderToDelete) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok("Order deleted successfully.");
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found with id: " + orderId);
     }
 
     @PostMapping("/{orderId}/pay")
-    public ResponseEntity<Void> payOrder(@PathVariable String orderId) {
+    public ResponseEntity<Void> payOrder(@PathVariable Long orderId) {
         boolean ok = orderService.payOrder(orderId);
         if (ok) {
             return ResponseEntity.accepted().build();

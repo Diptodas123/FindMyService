@@ -20,7 +20,7 @@ public class ServiceAttribute {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_id", nullable = false)
-    private Long serviceId;
+    private ServiceCatalog serviceId;
 
     @Column(length = 100, nullable = false)
     private String attributeName;

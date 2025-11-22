@@ -1,32 +1,46 @@
 package com.FindMyService.service;
 
 import com.FindMyService.model.Provider;
+import com.FindMyService.repository.ProviderRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ProviderService {
 
-    public List<Provider> getAllProviders() {
-        return Collections.emptyList();
+    private final ProviderRepository providerRepository;
+
+    public ProviderService(ProviderRepository providerRepository) {
+        this.providerRepository = providerRepository;
     }
 
-    public Optional<Provider> getProviderById(String providerId) {
-        return Optional.empty();
+    public List<Provider> getAllProviders() {
+        return providerRepository.findAll();
+    }
+
+    public Optional<Provider> getProviderById(Long providerId) {
+        return providerRepository.findById(providerId);
     }
 
     public Provider createProvider(Provider provider) {
-        return provider;
+        return providerRepository.save(provider);
     }
 
-    public Optional<Provider> updateProvider(String providerId, Provider provider) {
-        return Optional.empty();
+    public Optional<Provider> updateProvider(Long providerId, Provider provider) {
+        Provider existingProvider = providerRepository.findById(providerId).orElse(null);
+        if (existingProvider == null) {
+            return Optional.empty();
+        }
+        provider.setProviderId(providerId);
+        Provider updatedProvider = providerRepository.save(provider);
+        return Optional.of(updatedProvider);
     }
 
-    public boolean deleteProvider(String providerId) {
-        return false;
+    public boolean deleteProvider(Long providerId) {
+        return providerRepository.findById(providerId).map(provider -> {
+            providerRepository.delete(provider);
+            return true;
+        }).orElse(false);
     }
 }

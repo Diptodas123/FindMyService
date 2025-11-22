@@ -1,32 +1,46 @@
 package com.FindMyService.service;
 
 import com.FindMyService.model.User;
+import com.FindMyService.repository.UserRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UserService {
 
-    public List<User> getAllUsers() {
-        return Collections.emptyList();
+    private final UserRepository userRepository;
+
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
-    public Optional<User> getUserById(String userId) {
-        return Optional.empty();
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public Optional<User> getUserById(Long userId) {
+        return userRepository.findById(userId);
     }
 
     public User createUser(User user) {
-        return user;
+        return userRepository.save(user);
     }
 
-    public Optional<User> updateUser(String userId, User user) {
-        return Optional.empty();
+    public Optional<User> updateUser(Long userId, User user) {
+        User existingUser = userRepository.findById(userId).orElse(null);
+        if (existingUser == null) {
+            return Optional.empty();
+        }
+        user.setUserId(userId);
+        User updatedUser = userRepository.save(user);
+        return Optional.of(updatedUser);
     }
 
-    public boolean deleteUser(String userId) {
-        return false;
+    public boolean deleteUser(Long userId) {
+        return userRepository.findById(userId).map(user -> {
+            userRepository.delete(user);
+            return true;
+        }).orElse(false);
     }
 }
