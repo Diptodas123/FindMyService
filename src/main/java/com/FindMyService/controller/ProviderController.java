@@ -38,6 +38,11 @@ public class ProviderController {
 
     @GetMapping("/{providerId}")
     public ResponseEntity<ProviderDto> getProvider(@PathVariable Long providerId) {
+        try {
+            ownerCheck.verifyOwner(providerId);
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         return providerService.getProviderById(providerId)
                 .map(DtoMapper::toDto)
                 .map(ResponseEntity::ok)

@@ -20,6 +20,6 @@ public class ProviderDto{
     private Instant createdAt;
     private String profilePictureUrl;
     private List<String> imageUrls;
-    private boolean verified;
     private BigDecimal avgRating;
+    private int totalRatings;
 }

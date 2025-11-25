@@ -52,13 +52,6 @@ public class OrderService {
 
     @Transactional
     public ResponseEntity<?> createOrder(Order order) {
-        Optional<ServiceCatalog> service = serviceCatalogRepository.findById(order.getServiceId().getServiceId());
-        if (service.isEmpty()) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "Service from payload not found"));
-        }
-
         Optional<User> user = userRepository.findById(order.getUserId().getUserId());
         if (user.isEmpty()) {
             return ResponseEntity

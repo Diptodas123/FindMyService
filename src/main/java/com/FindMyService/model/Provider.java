@@ -3,6 +3,7 @@ package com.FindMyService.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -31,18 +32,14 @@ public class Provider {
 
     private String phone;
 
-    @NonNull
     private String addressLine1;
 
     private String addressLine2;
 
-    @NonNull
     private String city;
 
-    @NonNull
     private String state;
 
-    @NonNull
     private String zipCode;
 
     @NotBlank(message = "Password is required")
@@ -52,12 +49,13 @@ public class Provider {
     @Column(name = "image_url")
     private List<String> imageUrls;
 
-    private boolean verified;
-    private Instant createdAt = Instant.now();
+    @CreationTimestamp
+    private Instant createdAt;
 
     @Column(precision = 2, scale = 1)
     @DecimalMin("0.0")
     @DecimalMax("5.0")
     private BigDecimal avgRating;
+
     private int totalRatings;
 }

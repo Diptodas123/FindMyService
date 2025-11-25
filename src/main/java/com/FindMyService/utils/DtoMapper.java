@@ -39,7 +39,6 @@ public final class DtoMapper {
                 .state(provider.getState())
                 .city(provider.getCity())
                 .zipCode(provider.getZipCode())
-                .verified(provider.isVerified())
                 .createdAt(provider.getCreatedAt())
                 .avgRating(provider.getAvgRating())
                 .build();

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
@@ -39,5 +40,6 @@ public class Feedback {
     @Max(5)
     private Integer rating;
 
-    private Instant createdAt = Instant.now();
+    @CreationTimestamp
+    private Instant createdAt;
 }
