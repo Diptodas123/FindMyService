@@ -31,8 +31,8 @@ public class OwnerCheck {
         }
 
         String token = extractTokenFromRequest();
-        String tokenId = jwtTokenUtil.extractUserId(token)
-                .orElseThrow(() -> new AccessDeniedException("Invalid token"));
+        Long tokenId = Long.valueOf(jwtTokenUtil.extractUserId(token)
+                .orElseThrow(() -> new AccessDeniedException("Invalid token")));
 
         if (!tokenId.equals(resourceId)) {
             throw new AccessDeniedException("Forbidden: You can only access your own resources");
