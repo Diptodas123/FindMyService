@@ -16,7 +16,7 @@ public final class DtoMapper {
                 .userId(user.getUserId())
                 .name(user.getName())
                 .email(user.getEmail())
-                .role(Role.USER)
+                .role(user.getRole())
                 .phone(user.getPhone())
                 .addressLine1(user.getAddressLine1())
                 .addressLine2(user.getAddressLine2())
