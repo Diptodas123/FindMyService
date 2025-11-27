@@ -7,13 +7,13 @@ import com.FindMyService.repository.FeedbackRepository;
 import com.FindMyService.repository.ProviderRepository;
 import com.FindMyService.repository.ServiceCatalogRepository;
 import com.FindMyService.repository.UserRepository;
+import com.FindMyService.utils.ErrorResponseBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -40,11 +40,17 @@ public class FeedbackService {
 
     @Transactional
     public ResponseEntity<?> createFeedback(Feedback feedback) {
+        if (feedback.getRating() < 1 || feedback.getRating() > 5) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Rating must be between 1 and 5"));
+        }
+
         Optional<User> user = userRepository.findById(feedback.getUserId().getUserId());
         if (user.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "User from payload not found"));
+                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "User from payload not found"));
         }
 
         Optional<ServiceCatalog> serviceCatalog = serviceCatalogRepository
@@ -52,20 +58,33 @@ public class FeedbackService {
         if (serviceCatalog.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "Service catalog not found"));
+                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Service catalog not found"));
         }
 
         Feedback saved = feedbackRepository.save(feedback);
-        updateRatings(feedback);
+
+        try {
+            updateRatings(feedback);
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ErrorResponseBuilder.serverError(e.getMessage()));
+        }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @Transactional
-    public List<Feedback> getAllFeedbacksForService(Long serviceId) {
-        ServiceCatalog serviceCatalog = new ServiceCatalog();
-        serviceCatalog.setServiceId(serviceId);
-        return feedbackRepository.findByServiceId(serviceCatalog);
+    public ResponseEntity<?> getAllFeedbacksForService(Long serviceId) {
+        Optional<ServiceCatalog> serviceCatalog = serviceCatalogRepository.findById(serviceId);
+        if (serviceCatalog.isEmpty()) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "Service not found"));
+        }
+
+        List<Feedback> feedbacks = feedbackRepository.findByServiceId(serviceCatalog.get());
+        return ResponseEntity.ok(feedbacks);
     }
 
     void updateRatings(Feedback feedback) {
@@ -101,5 +120,4 @@ public class FeedbackService {
         providerRepository.save(provider);
         serviceCatalogRepository.save(serviceCatalog);
     }
-
 }

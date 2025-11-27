@@ -21,4 +21,23 @@ public final class ErrorResponseBuilder {
     public static Map<String, Object> forbidden(String message) {
         return build(HttpStatus.FORBIDDEN, message);
     }
+    public static Map<String, Object> unauthorized(String message) {
+        return build(HttpStatus.UNAUTHORIZED, message);
+    }
+
+    public static Map<String, Object> conflict(String message) {
+        return build(HttpStatus.CONFLICT, message);
+    }
+
+    public static Map<String, Object> serverError(String message) {
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, message);
+    }
+
+    public static Map<String, Object> created(String message) {
+        return build(HttpStatus.CREATED, message);
+    }
+
+    public static Map<String, Object> ok(String message) {
+        return build(HttpStatus.OK, message);
+    }
 }

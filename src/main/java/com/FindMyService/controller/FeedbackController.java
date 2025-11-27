@@ -23,9 +23,9 @@ public class FeedbackController {
         return ResponseEntity.ok(feedbackService.getAllFeedbacks());
     }
 
-    @GetMapping("/{orderId}")
-    public ResponseEntity<List<Feedback>> getAllFeedbacksForService(@PathVariable Long orderId) {
-        return ResponseEntity.ok(feedbackService.getAllFeedbacksForService(orderId));
+    @GetMapping("/{serviceId}")
+    public ResponseEntity<?> getAllFeedbacksForService(@PathVariable Long serviceId) {
+        return feedbackService.getAllFeedbacksForService(serviceId);
     }
 
     @PostMapping

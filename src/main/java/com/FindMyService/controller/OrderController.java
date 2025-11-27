@@ -19,9 +19,10 @@ public class OrderController {
 
     private final OrderService orderService;
     private final OwnerCheck ownerCheck;
-    public OrderController(OrderService orderService, OwnerCheck OwnerCheck) {
+
+    public OrderController(OrderService orderService, OwnerCheck ownerCheck) {
         this.orderService = orderService;
-        this.ownerCheck = OwnerCheck;
+        this.ownerCheck = ownerCheck;
     }
 
     @GetMapping
@@ -31,10 +32,12 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<Order> getOrderById(@PathVariable Long orderId) {
+    public ResponseEntity<?> getOrderById(@PathVariable Long orderId) {
         return orderService.getOrderById(orderId)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+                .map(order -> ResponseEntity.ok((Object) order))
+                .orElseGet(() -> ResponseEntity
+                        .status(HttpStatus.NOT_FOUND)
+                        .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "Order not found")));
     }
 
     @PostMapping
@@ -43,36 +46,36 @@ public class OrderController {
         try {
             ownerCheck.verifyOwner(order.getUserId().getUserId());
         } catch (AccessDeniedException ex) {
-            Map<String, Object> errorBody = ErrorResponseBuilder.forbidden(
-                    "You are not authorized to create this orders"
-            );
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody);
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(ErrorResponseBuilder.forbidden("You are not authorized to create this order"));
         }
         return orderService.createOrder(order);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{orderId}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<String> deleteOrder(@PathVariable Long orderId) {
+    public ResponseEntity<?> deleteOrder(@PathVariable Long orderId) {
         boolean orderToDelete = orderService.deleteOrder(orderId);
         if (orderToDelete) {
-            return ResponseEntity.ok("Order deleted successfully.");
+            return ResponseEntity.ok(ErrorResponseBuilder.ok("Order deleted successfully"));
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found with id: " + orderId);
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "Order not found with id: " + orderId));
     }
 
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasAuthority('ADMIN') or (hasAuthority('USER')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<?> getOrdersByUser(@PathVariable Long userId) {
         try {
             ownerCheck.verifyOwner(userId);
         } catch (AccessDeniedException ex) {
-            Map<String, Object> errorBody = ErrorResponseBuilder.forbidden(
-                    "You are not authorized to access these orders"
-            );
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody);
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(ErrorResponseBuilder.forbidden("You are not authorized to access these orders"));
         }
-        return ResponseEntity.ok(orderService.getOrdersByUser(userId));
+        return orderService.getOrdersByUser(userId);
     }
 
     @GetMapping("/provider/{providerId}")
@@ -81,12 +84,11 @@ public class OrderController {
         try {
             ownerCheck.verifyOwner(providerId);
         } catch (AccessDeniedException ex) {
-            Map<String, Object> errorBody = ErrorResponseBuilder.forbidden(
-                    "You are not authorized to access these orders"
-            );
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody);
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(ErrorResponseBuilder.forbidden("You are not authorized to access these orders"));
         }
-        return ResponseEntity.ok(orderService.getOrdersByProvider(providerId));
+        return orderService.getOrdersByProvider(providerId);
     }
 
     @PostMapping("/{orderId}/payment/initiate")
@@ -104,17 +106,20 @@ public class OrderController {
     }
 
     @PutMapping("/{orderId}/status")
-    public ResponseEntity<?> updateOrderStatus(@PathVariable Long orderId, OrderStatus newStatus) {
-        Order order = orderService.getOrderById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
-        try {
-            ownerCheck.verifyOwner(order.getProviderId().getProviderId());
-        } catch (AccessDeniedException ex) {
-            Map<String, Object> errorBody = ErrorResponseBuilder.forbidden(
-                    "You are not authorized to access these orders"
-            );
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody);
-        }
-        return orderService.updateOrderStatus(orderId, newStatus);
+    public ResponseEntity<?> updateOrderStatus(@PathVariable Long orderId, @RequestBody OrderStatus newStatus) {
+        return orderService.getOrderById(orderId)
+                .map(order -> {
+                    try {
+                        ownerCheck.verifyOwner(order.getProviderId().getProviderId());
+                        return orderService.updateOrderStatus(orderId, newStatus);
+                    } catch (AccessDeniedException ex) {
+                        return ResponseEntity
+                                .status(HttpStatus.FORBIDDEN)
+                                .body(ErrorResponseBuilder.forbidden("You are not authorized to update this order"));
+                    }
+                })
+                .orElseGet(() -> ResponseEntity
+                        .status(HttpStatus.NOT_FOUND)
+                        .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "Order not found")));
     }
 }
