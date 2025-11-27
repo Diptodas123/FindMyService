@@ -2,6 +2,7 @@ package com.FindMyService.controller;
 
 import com.FindMyService.model.ServiceCatalog;
 import com.FindMyService.service.ServiceCatalogService;
+import com.FindMyService.utils.ErrorResponseBuilder;
 import com.FindMyService.utils.OwnerCheck;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,10 +42,8 @@ public class ServiceCatalogController {
         try {
             ownerCheck.verifyOwner(service.getProviderId().getProviderId());
         } catch (AccessDeniedException ex) {
-            Map<String, Object> errorBody = Map.of(
-                    "status", HttpStatus.FORBIDDEN.value(),
-                    "error", "Forbidden",
-                    "message", "You are not authorized to access these orders"
+            Map<String, Object> errorBody = ErrorResponseBuilder.forbidden(
+                    "You are not authorized to create service for this provider"
             );
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody);
         }
@@ -57,10 +56,8 @@ public class ServiceCatalogController {
         try {
             ownerCheck.verifyOwner(service.getProviderId().getProviderId());
         } catch (AccessDeniedException ex) {
-            Map<String, Object> errorBody = Map.of(
-                    "status", HttpStatus.FORBIDDEN.value(),
-                    "error", "Forbidden",
-                    "message", "You are not authorized to access these orders"
+            Map<String, Object> errorBody = ErrorResponseBuilder.forbidden(
+                    "You are not authorized to access this service"
             );
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody);
         }
@@ -75,10 +72,8 @@ public class ServiceCatalogController {
         try {
             ownerCheck.verifyOwner(service.getProviderId().getProviderId());
         } catch (AccessDeniedException ex) {
-            Map<String, Object> errorBody = Map.of(
-                    "status", HttpStatus.FORBIDDEN.value(),
-                    "error", "Forbidden",
-                    "message", "You are not authorized to access these orders"
+            Map<String, Object> errorBody = ErrorResponseBuilder.forbidden(
+                    "You are not authorized to delete this service"
             );
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody);
         }

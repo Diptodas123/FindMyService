@@ -3,6 +3,7 @@ package com.FindMyService.controller;
 import com.FindMyService.model.Order;
 import com.FindMyService.model.enums.OrderStatus;
 import com.FindMyService.service.OrderService;
+import com.FindMyService.utils.ErrorResponseBuilder;
 import com.FindMyService.utils.OwnerCheck;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,10 +43,8 @@ public class OrderController {
         try {
             ownerCheck.verifyOwner(order.getUserId().getUserId());
         } catch (AccessDeniedException ex) {
-            Map<String, Object> errorBody = Map.of(
-                    "status", HttpStatus.FORBIDDEN.value(),
-                    "error", "Forbidden",
-                    "message", "You are not authorized to access these orders"
+            Map<String, Object> errorBody = ErrorResponseBuilder.forbidden(
+                    "You are not authorized to create this orders"
             );
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody);
         }
@@ -68,10 +67,8 @@ public class OrderController {
         try {
             ownerCheck.verifyOwner(userId);
         } catch (AccessDeniedException ex) {
-            Map<String, Object> errorBody = Map.of(
-                    "status", HttpStatus.FORBIDDEN.value(),
-                    "error", "Forbidden",
-                    "message", "You are not authorized to access these orders"
+            Map<String, Object> errorBody = ErrorResponseBuilder.forbidden(
+                    "You are not authorized to access these orders"
             );
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody);
         }
@@ -84,10 +81,8 @@ public class OrderController {
         try {
             ownerCheck.verifyOwner(providerId);
         } catch (AccessDeniedException ex) {
-            Map<String, Object> errorBody = Map.of(
-                    "status", HttpStatus.FORBIDDEN.value(),
-                    "error", "Forbidden",
-                    "message", "You are not authorized to access these orders"
+            Map<String, Object> errorBody = ErrorResponseBuilder.forbidden(
+                    "You are not authorized to access these orders"
             );
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody);
         }
@@ -115,10 +110,8 @@ public class OrderController {
         try {
             ownerCheck.verifyOwner(order.getProviderId().getProviderId());
         } catch (AccessDeniedException ex) {
-            Map<String, Object> errorBody = Map.of(
-                    "status", HttpStatus.FORBIDDEN.value(),
-                    "error", "Forbidden",
-                    "message", "You are not authorized to access these orders"
+            Map<String, Object> errorBody = ErrorResponseBuilder.forbidden(
+                    "You are not authorized to access these orders"
             );
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody);
         }

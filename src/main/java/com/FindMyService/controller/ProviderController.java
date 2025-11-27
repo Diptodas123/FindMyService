@@ -4,6 +4,7 @@ import com.FindMyService.model.Provider;
 import com.FindMyService.model.dto.ProviderDto;
 import com.FindMyService.service.ProviderService;
 import com.FindMyService.utils.DtoMapper;
+import com.FindMyService.utils.ErrorResponseBuilder;
 import com.FindMyService.utils.OwnerCheck;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,10 +42,8 @@ public class ProviderController {
         try {
             ownerCheck.verifyOwner(providerId);
         } catch (AccessDeniedException ex) {
-            Map<String, Object> errorBody = Map.of(
-                    "status", HttpStatus.FORBIDDEN.value(),
-                    "error", "Forbidden",
-                    "message", "You are not authorized to access these orders"
+            Map<String, Object> errorBody = ErrorResponseBuilder.forbidden(
+                    "You are not authorized to access this provider"
             );
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody);
         }
@@ -70,10 +69,8 @@ public class ProviderController {
         try {
             ownerCheck.verifyOwner(providerId);
         } catch (AccessDeniedException ex) {
-            Map<String, Object> errorBody = Map.of(
-                    "status", HttpStatus.FORBIDDEN.value(),
-                    "error", "Forbidden",
-                    "message", "You are not authorized to access these orders"
+            Map<String, Object> errorBody = ErrorResponseBuilder.forbidden(
+                    "You are not authorized to access this provider"
             );
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody);
         }
@@ -89,10 +86,8 @@ public class ProviderController {
         try {
             ownerCheck.verifyOwner(providerId);
         } catch (AccessDeniedException ex) {
-            Map<String, Object> errorBody = Map.of(
-                    "status", HttpStatus.FORBIDDEN.value(),
-                    "error", "Forbidden",
-                    "message", "You are not authorized to access these orders"
+            Map<String, Object> errorBody = ErrorResponseBuilder.forbidden(
+                    "You are not authorized to delete this provider"
             );
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody);
         }

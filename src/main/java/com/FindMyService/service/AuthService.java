@@ -70,6 +70,7 @@ public class AuthService {
                         .builder()
                         .name(request.getName())
                         .email(request.getEmail())
+                        .role(request.getRole())
                         .password(request.getPassword())
                         .build();
 
@@ -105,7 +106,10 @@ public class AuthService {
                 if (user == null || !encoder.matches(request.getPassword(), user.getPassword())) {
                     return Map.of("error", "Invalid email or password");
                 }
-                String token = jwtUtil.generateToken(user.getUserId().toString(), user.getEmail(), request.getRole());
+                if(request.getRole() != user.getRole()) {
+                    return Map.of("error", "Invalid role for user");
+                }
+                String token = jwtUtil.generateToken(user.getUserId().toString(), user.getEmail(), user.getRole());
                 return Map.of("token", token);
             }
             default -> {
