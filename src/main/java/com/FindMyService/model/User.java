@@ -4,6 +4,7 @@ import com.FindMyService.model.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
@@ -37,19 +38,18 @@ public class User {
 
     private String phone;
 
-    @NonNull
     private String addressLine1;
 
     private String addressLine2;
 
-    @NonNull
     private String city;
 
-    @NonNull
     private String state;
 
-    @NonNull
     private String zipCode;
-    private Instant createdAt = Instant.now();
+
+    @CreationTimestamp
+    private Instant createdAt;
+
     private String profilePictureUrl;
 }

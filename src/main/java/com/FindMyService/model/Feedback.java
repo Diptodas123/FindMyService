@@ -1,12 +1,15 @@
 package com.FindMyService.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
 @Entity
-@Table(name = "feedback")
+@Table(name = "feedbacks")
 @Data
 @Builder
 @NoArgsConstructor
@@ -32,5 +35,11 @@ public class Feedback {
     @Lob
     private String comment;
 
-    private Instant createdAt = Instant.now();
+    @Column(nullable = false)
+    @Min(0)
+    @Max(5)
+    private Integer rating;
+
+    @CreationTimestamp
+    private Instant createdAt;
 }

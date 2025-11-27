@@ -2,8 +2,11 @@ package com.FindMyService.model;
 
 import com.FindMyService.model.enums.Availability;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.lang.Nullable;
 
 import java.math.BigDecimal;
@@ -46,7 +49,19 @@ public class ServiceCatalog {
     @Nullable
     private Integer warrantyPeriodMonths;
     private String imageUrl;
-    private Instant createdAt = Instant.now();
-    private Instant updatedAt = Instant.now();
+
+    @CreationTimestamp
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    private Instant updatedAt;
+
     private boolean active;
+
+    @Column(precision = 2, scale = 1)
+    @DecimalMin("0.0")
+    @DecimalMax("5.0")
+    private BigDecimal avgRating;
+
+    private int totalRatings;
 }

@@ -8,11 +8,12 @@ import com.FindMyService.model.enums.Role;
 import com.FindMyService.repository.ProviderRepository;
 import com.FindMyService.repository.UserRepository;
 import com.FindMyService.security.JwtTokenUtil;
+import com.FindMyService.utils.ErrorResponseBuilder;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.Map;
-import java.util.Objects;
 
 @Service
 public class AuthService {
@@ -38,93 +39,115 @@ public class AuthService {
         this.jwtUtil = jwtUtil;
     }
 
-    public Map<String, String> register(RegisterRequestDto request) {
+    public ResponseEntity<Map<String, Object>> register(RegisterRequestDto request) {
         Role role = request.getRole();
         if (role == null) {
-            return Map.of("error", "Role must be provided");
+            return ResponseEntity
+                    .badRequest()
+                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Role must be provided"));
         }
 
         switch (role) {
             case PROVIDER -> {
                 if (providerRepository.existsByEmail(request.getEmail())) {
-                    return Map.of("error", "Email already registered");
+                    return ResponseEntity
+                            .status(HttpStatus.CONFLICT)
+                            .body(ErrorResponseBuilder.conflict("Email already registered"));
                 }
 
-                Provider provider = new Provider();
-                provider.setProviderName(request.getName());
-                provider.setEmail(request.getEmail());
-                provider.setPassword(request.getPassword());
-                provider.setPhone(request.getPhone());
-                provider.setAddressLine1(request.getAddressLine1());
-                provider.setAddressLine2(request.getAddressLine2());
-                provider.setCity(request.getCity());
-                provider.setState(request.getState());
-                provider.setZipCode(request.getZipCode());
+                Provider provider = Provider
+                        .builder()
+                        .providerName(request.getName())
+                        .email(request.getEmail())
+                        .password(request.getPassword())
+                        .build();
 
-                Provider created = providerService.createProvider(provider);
-                if (created == null || Objects.equals(created.getEmail(), null)) {
-                    return Map.of("error", "Unable to register provider");
+                ResponseEntity<?> response = providerService.createProvider(provider);
+                if (response.getStatusCode() != HttpStatus.CREATED) {
+                    return ResponseEntity
+                            .status(response.getStatusCode())
+                            .body((Map<String, Object>) response.getBody());
                 }
+
+                return ResponseEntity
+                        .status(HttpStatus.CREATED)
+                        .body(ErrorResponseBuilder.created("Provider registered successfully"));
             }
-            case USER, ADMIN -> {
+            case USER -> {
                 if (userRepository.existsByEmail(request.getEmail())) {
-                    return Map.of("error", "Email already registered");
+                    return ResponseEntity
+                            .status(HttpStatus.CONFLICT)
+                            .body(ErrorResponseBuilder.conflict("Email already registered"));
                 }
-                User user = new User();
-                user.setName(request.getName());
-                user.setEmail(request.getEmail());
-                user.setPassword(request.getPassword());
-                user.setRole(request.getRole());
-                user.setPhone(request.getPhone());
-                user.setAddressLine1(request.getAddressLine1());
-                user.setAddressLine2(request.getAddressLine2());
-                user.setCity(request.getCity());
-                user.setState(request.getState());
-                user.setZipCode(request.getZipCode());
+                User user = User
+                        .builder()
+                        .name(request.getName())
+                        .email(request.getEmail())
+                        .role(request.getRole())
+                        .password(request.getPassword())
+                        .build();
 
-                User created = userService.createUser(user);
-                if (created == null || Objects.equals(created.getUserId(), null)) {
-                    return Map.of("error", "Unable to register user");
+                ResponseEntity<?> response = userService.createUser(user);
+                if (response.getStatusCode() != HttpStatus.CREATED) {
+                    return ResponseEntity
+                            .status(response.getStatusCode())
+                            .body((Map<String, Object>) response.getBody());
                 }
+
+                return ResponseEntity
+                        .status(HttpStatus.CREATED)
+                        .body(ErrorResponseBuilder.created("User registered successfully"));
             }
             default -> {
-                return Map.of("error", "Invalid role");
+                return ResponseEntity
+                        .badRequest()
+                        .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Invalid role"));
             }
         }
-
-        return Map.of("message", "User registered successfully");
     }
 
-    public Map<String, String> login(LoginRequestDto request) {
+    public ResponseEntity<Map<String, Object>> login(LoginRequestDto request) {
         Role role = request.getRole();
+
+        if (role == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Role must be provided"));
+        }
 
         switch (role) {
             case PROVIDER -> {
-                var provider = providerRepository.findByEmail(request.getEmail()).orElse(null);
+                Provider provider = providerRepository.findByEmail(request.getEmail()).orElse(null);
 
                 if (provider == null || !encoder.matches(request.getPassword(), provider.getPassword())) {
-                    return Map.of("error", "Invalid email or password");
+                    return ResponseEntity
+                            .status(HttpStatus.UNAUTHORIZED)
+                            .body(ErrorResponseBuilder.unauthorized("Invalid email or password"));
                 }
-                String token = jwtUtil.generateToken(provider.getProviderId().toString(), provider.getEmail(), Role.PROVIDER);
-                return Map.of("token", token);
+                String token = jwtUtil.generateToken(provider.getProviderId().toString(), provider.getEmail(), request.getRole());
+                return ResponseEntity.ok(Map.of("token", token));
             }
             case USER, ADMIN -> {
-                var user = userRepository.findByEmail(request.getEmail()).orElse(null);
+                User user = userRepository.findByEmail(request.getEmail()).orElse(null);
 
                 if (user == null || !encoder.matches(request.getPassword(), user.getPassword())) {
-                    return Map.of("error", "Invalid email or password");
+                    return ResponseEntity
+                            .status(HttpStatus.UNAUTHORIZED)
+                            .body(ErrorResponseBuilder.unauthorized("Invalid email or password"));
                 }
-                if(request.getRole() != user.getRole()) {
-                    return Map.of("error", "Invalid role for user");
+                if (request.getRole() != user.getRole()) {
+                    return ResponseEntity
+                            .status(HttpStatus.FORBIDDEN)
+                            .body(ErrorResponseBuilder.forbidden("Invalid role for user"));
                 }
                 String token = jwtUtil.generateToken(user.getUserId().toString(), user.getEmail(), user.getRole());
-                return Map.of("token", token);
+                return ResponseEntity.ok(Map.of("token", token));
             }
             default -> {
-                return Map.of("error", "Invalid role");
+                return ResponseEntity
+                        .badRequest()
+                        .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Invalid role"));
             }
         }
-
-
     }
 }

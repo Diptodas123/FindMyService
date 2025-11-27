@@ -3,6 +3,7 @@ package com.FindMyService.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
@@ -35,5 +36,6 @@ public class ServiceAttribute {
     )
     private String valueType;
 
-    private Instant createdAt = Instant.now();
+    @CreationTimestamp
+    private Instant createdAt;
 }

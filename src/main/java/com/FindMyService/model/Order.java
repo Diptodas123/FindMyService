@@ -5,10 +5,11 @@ import com.FindMyService.model.enums.PaymentMethod;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.*;
-
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @Table(name = "orders")
@@ -22,13 +23,17 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "service_id", nullable = false)
-    private ServiceCatalog serviceId;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "order_line_items",
+            joinColumns = @JoinColumn(name = "order_id"),
+            inverseJoinColumns = @JoinColumn(name = "line_item_id")
+    )
+    private Set<LineItem> lineItemDTOS;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ordered_by_user_id", nullable = false)
-    private User UserId;
+    private User userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "provider_id", nullable = false)
@@ -37,12 +42,6 @@ public class Order {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private OrderStatus orderStatus;
-
-    @NonNull
-    private Integer quantityUnits;
-
-    private LocalDate requestedDate;
-    private LocalDate scheduledDate;
 
     @Column(precision = 8, scale = 2)
     @DecimalMin(value = "0.0", inclusive = false, message = "Cost must be greater than 0")
@@ -54,7 +53,12 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
-    private Instant paymentDate = Instant.now();
-    private Instant createdAt = Instant.now();
-    private Instant updatedAt = Instant.now();
+    private String stripePaymentIntentId;
+    private Instant paymentDate;
+
+    @CreationTimestamp
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    private Instant updatedAt;
 }
