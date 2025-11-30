@@ -1,8 +1,10 @@
 package com.FindMyService.service;
 
 import com.FindMyService.model.User;
+import com.FindMyService.model.dto.UserDto;
 import com.FindMyService.repository.UserRepository;
-import com.FindMyService.utils.ErrorResponseBuilder;
+import com.FindMyService.utils.DtoMapper;
+import com.FindMyService.utils.ResponseBuilder;
 import com.FindMyService.utils.OwnerCheck;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,13 +40,13 @@ public class UserService {
         if (user.getEmail() == null || user.getEmail().isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Email is required"));
+                    .body(ResponseBuilder.build(HttpStatus.BAD_REQUEST, "Email is required"));
         }
 
         if (user.getPassword() == null || user.getPassword().isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Password is required"));
+                    .body(ResponseBuilder.build(HttpStatus.BAD_REQUEST, "Password is required"));
         }
 
         try {
@@ -54,40 +56,44 @@ public class UserService {
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ErrorResponseBuilder.serverError("Failed to create user: " + e.getMessage()));
+                    .body(ResponseBuilder.serverError("Failed to create user: " + e.getMessage()));
         }
     }
 
     @Transactional
-    public ResponseEntity<?> updateUser(Long userId, User user) {
-        Optional<User> existingUser = userRepository.findById(userId);
-        if (existingUser.isEmpty()) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "User not found"));
+    public UserDto updateUser(Long userId, UserDto userDto) {
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+
+        updateIfNotNull(userDto.getName(), existingUser::setName);
+        updateIfNotNull(userDto.getEmail(), existingUser::setEmail);
+        updateIfNotNull(userDto.getPhone(), existingUser::setPhone);
+        updateIfNotNull(userDto.getAddressLine1(), existingUser::setAddressLine1);
+        updateIfNotNull(userDto.getAddressLine2(), existingUser::setAddressLine2);
+        updateIfNotNull(userDto.getCity(), existingUser::setCity);
+        updateIfNotNull(userDto.getState(), existingUser::setState);
+        updateIfNotNull(userDto.getZipCode(), existingUser::setZipCode);
+        updateIfNotNull(userDto.getRole(), existingUser::setRole);
+        updateIfNotNull(userDto.getProfilePictureUrl(), existingUser::setProfilePictureUrl);
+
+        if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
+            existingUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
         }
 
-        try {
-            user.setUserId(userId);
-            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-                user.setPassword(passwordEncoder.encode(user.getPassword()));
-            } else {
-                user.setPassword(existingUser.get().getPassword());
-            }
-            User updated = userRepository.save(user);
-            return ResponseEntity.ok(updated);
-        } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ErrorResponseBuilder.serverError("Failed to update user: " + e.getMessage()));
-        }
+        User updated = userRepository.save(existingUser);
+        return DtoMapper.toDto(updated);
     }
 
     @Transactional
-    public boolean deleteUser(Long userId) {
-        return userRepository.findById(userId).map(user -> {
-            userRepository.delete(user);
-            return true;
-        }).orElse(false);
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+        userRepository.delete(user);
+    }
+
+    private <T> void updateIfNotNull(T value, java.util.function.Consumer<T> setter) {
+        if (value != null) {
+            setter.accept(value);
+        }
     }
 }

@@ -2,13 +2,12 @@ package com.FindMyService.utils;
 
 import org.springframework.http.HttpStatus;
 
-import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public final class ErrorResponseBuilder {
+public final class ResponseBuilder {
 
-    private ErrorResponseBuilder() {}
+    private ResponseBuilder() {}
 
     public static Map<String, Object> build(HttpStatus status, String message) {
         Map<String, Object> body = new LinkedHashMap<>();
@@ -39,5 +38,17 @@ public final class ErrorResponseBuilder {
 
     public static Map<String, Object> ok(String message) {
         return build(HttpStatus.OK, message);
+    }
+
+    public static Map<String, Object> notFound(String message) {
+        return build(HttpStatus.NOT_FOUND, message);
+    }
+
+    public static Map<String, Object> badRequest(String message) {
+        return build(HttpStatus.BAD_REQUEST, message);
+    }
+
+    public static Map<String, Object> internalServerError(String message) {
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, message);
     }
 }

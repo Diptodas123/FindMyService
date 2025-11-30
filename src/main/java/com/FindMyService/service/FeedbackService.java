@@ -7,7 +7,7 @@ import com.FindMyService.repository.FeedbackRepository;
 import com.FindMyService.repository.ProviderRepository;
 import com.FindMyService.repository.ServiceCatalogRepository;
 import com.FindMyService.repository.UserRepository;
-import com.FindMyService.utils.ErrorResponseBuilder;
+import com.FindMyService.utils.ResponseBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -43,14 +43,14 @@ public class FeedbackService {
         if (feedback.getRating() < 1 || feedback.getRating() > 5) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Rating must be between 1 and 5"));
+                    .body(ResponseBuilder.build(HttpStatus.BAD_REQUEST, "Rating must be between 1 and 5"));
         }
 
         Optional<User> user = userRepository.findById(feedback.getUserId().getUserId());
         if (user.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "User from payload not found"));
+                    .body(ResponseBuilder.build(HttpStatus.BAD_REQUEST, "User from payload not found"));
         }
 
         Optional<ServiceCatalog> serviceCatalog = serviceCatalogRepository
@@ -58,7 +58,7 @@ public class FeedbackService {
         if (serviceCatalog.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Service catalog not found"));
+                    .body(ResponseBuilder.build(HttpStatus.BAD_REQUEST, "Service catalog not found"));
         }
 
         Feedback saved = feedbackRepository.save(feedback);
@@ -68,7 +68,7 @@ public class FeedbackService {
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ErrorResponseBuilder.serverError(e.getMessage()));
+                    .body(ResponseBuilder.serverError(e.getMessage()));
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
@@ -80,7 +80,7 @@ public class FeedbackService {
         if (serviceCatalog.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "Service not found"));
+                    .body(ResponseBuilder.build(HttpStatus.NOT_FOUND, "Service not found"));
         }
 
         List<Feedback> feedbacks = feedbackRepository.findByServiceId(serviceCatalog.get());

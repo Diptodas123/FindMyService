@@ -8,7 +8,7 @@ import com.FindMyService.model.enums.Role;
 import com.FindMyService.repository.ProviderRepository;
 import com.FindMyService.repository.UserRepository;
 import com.FindMyService.security.JwtTokenUtil;
-import com.FindMyService.utils.ErrorResponseBuilder;
+import com.FindMyService.utils.ResponseBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -44,7 +44,7 @@ public class AuthService {
         if (role == null) {
             return ResponseEntity
                     .badRequest()
-                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Role must be provided"));
+                    .body(ResponseBuilder.build(HttpStatus.BAD_REQUEST, "Role must be provided"));
         }
 
         switch (role) {
@@ -52,7 +52,7 @@ public class AuthService {
                 if (providerRepository.existsByEmail(request.getEmail())) {
                     return ResponseEntity
                             .status(HttpStatus.CONFLICT)
-                            .body(ErrorResponseBuilder.conflict("Email already registered"));
+                            .body(ResponseBuilder.conflict("Email already registered"));
                 }
 
                 Provider provider = Provider
@@ -71,13 +71,13 @@ public class AuthService {
 
                 return ResponseEntity
                         .status(HttpStatus.CREATED)
-                        .body(ErrorResponseBuilder.created("Provider registered successfully"));
+                        .body(ResponseBuilder.created("Provider registered successfully"));
             }
             case USER -> {
                 if (userRepository.existsByEmail(request.getEmail())) {
                     return ResponseEntity
                             .status(HttpStatus.CONFLICT)
-                            .body(ErrorResponseBuilder.conflict("Email already registered"));
+                            .body(ResponseBuilder.conflict("Email already registered"));
                 }
                 User user = User
                         .builder()
@@ -96,12 +96,12 @@ public class AuthService {
 
                 return ResponseEntity
                         .status(HttpStatus.CREATED)
-                        .body(ErrorResponseBuilder.created("User registered successfully"));
+                        .body(ResponseBuilder.created("User registered successfully"));
             }
             default -> {
                 return ResponseEntity
                         .badRequest()
-                        .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Invalid role"));
+                        .body(ResponseBuilder.build(HttpStatus.BAD_REQUEST, "Invalid role"));
             }
         }
     }
@@ -112,7 +112,7 @@ public class AuthService {
         if (role == null) {
             return ResponseEntity
                     .badRequest()
-                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Role must be provided"));
+                    .body(ResponseBuilder.build(HttpStatus.BAD_REQUEST, "Role must be provided"));
         }
 
         switch (role) {
@@ -122,7 +122,7 @@ public class AuthService {
                 if (provider == null || !encoder.matches(request.getPassword(), provider.getPassword())) {
                     return ResponseEntity
                             .status(HttpStatus.UNAUTHORIZED)
-                            .body(ErrorResponseBuilder.unauthorized("Invalid email or password"));
+                            .body(ResponseBuilder.unauthorized("Invalid email or password"));
                 }
                 String token = jwtUtil.generateToken(provider.getProviderId().toString(), provider.getEmail(), request.getRole());
                 return ResponseEntity.ok(Map.of("token", token, "providerId", provider.getProviderId()));
@@ -133,12 +133,12 @@ public class AuthService {
                 if (user == null || !encoder.matches(request.getPassword(), user.getPassword())) {
                     return ResponseEntity
                             .status(HttpStatus.UNAUTHORIZED)
-                            .body(ErrorResponseBuilder.unauthorized("Invalid email or password"));
+                            .body(ResponseBuilder.unauthorized("Invalid email or password"));
                 }
                 if (request.getRole() != user.getRole()) {
                     return ResponseEntity
                             .status(HttpStatus.FORBIDDEN)
-                            .body(ErrorResponseBuilder.forbidden("Invalid role for user"));
+                            .body(ResponseBuilder.forbidden("Invalid role for user"));
                 }
                 String token = jwtUtil.generateToken(user.getUserId().toString(), user.getEmail(), user.getRole());
                 return ResponseEntity.ok(Map.of("token", token, "userId", user.getUserId()));
@@ -146,7 +146,7 @@ public class AuthService {
             default -> {
                 return ResponseEntity
                         .badRequest()
-                        .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Invalid role"));
+                        .body(ResponseBuilder.build(HttpStatus.BAD_REQUEST, "Invalid role"));
             }
         }
     }

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.FindMyService.model.dto.UserDto;
 import com.FindMyService.utils.DtoMapper;
-import com.FindMyService.utils.ErrorResponseBuilder;
+import com.FindMyService.utils.ResponseBuilder;
 import com.FindMyService.utils.OwnerCheck;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,14 +43,14 @@ public class UserController {
         } catch (AccessDeniedException ex) {
             return ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
-                    .body(ErrorResponseBuilder.forbidden("You are not authorized to access this user"));
+                    .body(ResponseBuilder.forbidden("You are not authorized to access this user"));
         }
         return userService.getUserById(userId)
                 .map(DtoMapper::toDto)
                 .map(dto -> ResponseEntity.ok((Object) dto))
                 .orElseGet(() -> ResponseEntity
                         .status(HttpStatus.NOT_FOUND)
-                        .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "User not found")));
+                        .body(ResponseBuilder.build(HttpStatus.NOT_FOUND, "User not found")));
     }
 
     @PostMapping
@@ -59,18 +59,26 @@ public class UserController {
         return userService.createUser(user);
     }
 
-    @PutMapping("/{userId}")
+    @PatchMapping("/{userId}")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
-    public ResponseEntity<?> updateUser(@PathVariable Long userId, @RequestBody User user) {
+    public ResponseEntity<?> updateUser(@PathVariable Long userId, @RequestBody UserDto userDto) {
         try {
             ownerCheck.verifyOwner(userId);
+            UserDto updatedUser = userService.updateUser(userId, userDto);
+            return ResponseEntity.ok(updatedUser);
         } catch (AccessDeniedException ex) {
             return ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
-                    .body(ErrorResponseBuilder.forbidden("You are not authorized to update this user"));
+                    .body(ResponseBuilder.forbidden("You are not authorized to update this user"));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(ResponseBuilder.notFound(ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ResponseBuilder.internalServerError("Failed to update user: " + ex.getMessage()));
         }
-
-        return userService.updateUser(userId, user);
     }
 
     @DeleteMapping("/{userId}")
@@ -78,23 +86,20 @@ public class UserController {
     public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
         try {
             ownerCheck.verifyOwner(userId);
+            userService.deleteUser(userId);
+            return ResponseEntity.ok(ResponseBuilder.ok("User deleted successfully"));
         } catch (AccessDeniedException ex) {
             return ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
-                    .body(ErrorResponseBuilder.forbidden("You are not authorized to delete this user"));
-        }
-        if (userId == null || userId <= 0) {
+                    .body(ResponseBuilder.forbidden("You are not authorized to delete this user"));
+        } catch (IllegalArgumentException ex) {
             return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Invalid userId"));
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(ResponseBuilder.notFound(ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ResponseBuilder.internalServerError("Failed to delete user: " + ex.getMessage()));
         }
-
-        boolean deleted = userService.deleteUser(userId);
-        if (deleted) {
-            return ResponseEntity.ok(ErrorResponseBuilder.ok("User with id " + userId + " deleted successfully"));
-        }
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "User not found"));
     }
 }

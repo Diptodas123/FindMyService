@@ -1,6 +1,7 @@
 package com.FindMyService.model;
 
 import com.FindMyService.model.enums.Availability;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -27,6 +28,7 @@ public class ServiceCatalog {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "provider_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Provider providerId;
 
     @Column(name = "service_name", nullable = false, length = 160)

@@ -3,7 +3,7 @@ package com.FindMyService.controller;
 import com.FindMyService.model.Order;
 import com.FindMyService.model.enums.OrderStatus;
 import com.FindMyService.service.OrderService;
-import com.FindMyService.utils.ErrorResponseBuilder;
+import com.FindMyService.utils.ResponseBuilder;
 import com.FindMyService.utils.OwnerCheck;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +37,7 @@ public class OrderController {
                 .map(order -> ResponseEntity.ok((Object) order))
                 .orElseGet(() -> ResponseEntity
                         .status(HttpStatus.NOT_FOUND)
-                        .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "Order not found")));
+                        .body(ResponseBuilder.build(HttpStatus.NOT_FOUND, "Order not found")));
     }
 
     @PostMapping
@@ -48,7 +48,7 @@ public class OrderController {
         } catch (AccessDeniedException ex) {
             return ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
-                    .body(ErrorResponseBuilder.forbidden("You are not authorized to create this order"));
+                    .body(ResponseBuilder.forbidden("You are not authorized to create this order"));
         }
         return orderService.createOrder(order);
     }
@@ -58,11 +58,11 @@ public class OrderController {
     public ResponseEntity<?> deleteOrder(@PathVariable Long orderId) {
         boolean orderToDelete = orderService.deleteOrder(orderId);
         if (orderToDelete) {
-            return ResponseEntity.ok(ErrorResponseBuilder.ok("Order deleted successfully"));
+            return ResponseEntity.ok(ResponseBuilder.ok("Order deleted successfully"));
         }
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "Order not found with id: " + orderId));
+                .body(ResponseBuilder.build(HttpStatus.NOT_FOUND, "Order not found with id: " + orderId));
     }
 
     @GetMapping("/user/{userId}")
@@ -73,7 +73,7 @@ public class OrderController {
         } catch (AccessDeniedException ex) {
             return ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
-                    .body(ErrorResponseBuilder.forbidden("You are not authorized to access these orders"));
+                    .body(ResponseBuilder.forbidden("You are not authorized to access these orders"));
         }
         return orderService.getOrdersByUser(userId);
     }
@@ -86,7 +86,7 @@ public class OrderController {
         } catch (AccessDeniedException ex) {
             return ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
-                    .body(ErrorResponseBuilder.forbidden("You are not authorized to access these orders"));
+                    .body(ResponseBuilder.forbidden("You are not authorized to access these orders"));
         }
         return orderService.getOrdersByProvider(providerId);
     }
@@ -115,11 +115,11 @@ public class OrderController {
                     } catch (AccessDeniedException ex) {
                         return ResponseEntity
                                 .status(HttpStatus.FORBIDDEN)
-                                .body(ErrorResponseBuilder.forbidden("You are not authorized to update this order"));
+                                .body(ResponseBuilder.forbidden("You are not authorized to update this order"));
                     }
                 })
                 .orElseGet(() -> ResponseEntity
                         .status(HttpStatus.NOT_FOUND)
-                        .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "Order not found")));
+                        .body(ResponseBuilder.build(HttpStatus.NOT_FOUND, "Order not found")));
     }
 }
