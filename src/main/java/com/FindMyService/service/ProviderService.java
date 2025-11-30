@@ -64,6 +64,7 @@ public class ProviderService {
         Provider existingProvider = providerRepository.findById(providerId)
                 .orElseThrow(() -> new IllegalArgumentException("Provider not found with id: " + providerId));
 
+        // Update regular fields
         updateIfNotNull(providerDto.getProviderName(), existingProvider::setProviderName);
         updateIfNotNull(providerDto.getEmail(), existingProvider::setEmail);
         updateIfNotNull(providerDto.getPhone(), existingProvider::setPhone);
@@ -73,7 +74,18 @@ public class ProviderService {
         updateIfNotNull(providerDto.getState(), existingProvider::setState);
         updateIfNotNull(providerDto.getZipCode(), existingProvider::setZipCode);
 
+        // Handle password update with validation
         if (providerDto.getPassword() != null && !providerDto.getPassword().isEmpty()) {
+            // Validate current password before updating
+            if (providerDto.getCurrentPassword() == null || providerDto.getCurrentPassword().isEmpty()) {
+                throw new IllegalArgumentException("Current password is required to update password");
+            }
+
+            if (!passwordEncoder.matches(providerDto.getCurrentPassword(), existingProvider.getPassword())) {
+                throw new IllegalArgumentException("Current password is incorrect");
+            }
+
+            // If validation passes, update to new password
             existingProvider.setPassword(passwordEncoder.encode(providerDto.getPassword()));
         }
 
