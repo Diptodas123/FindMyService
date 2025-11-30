@@ -17,10 +17,10 @@ public class UserDto {
     private String email;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private String currentPassword;  // For password validation before update
+    private String currentPassword;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private String password;  // New password
+    private String password;
 
     private Role role;
     private String phone;

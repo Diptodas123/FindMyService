@@ -65,7 +65,6 @@ public class UserService {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
 
-        // Update regular fields
         updateIfNotNull(userDto.getName(), existingUser::setName);
         updateIfNotNull(userDto.getEmail(), existingUser::setEmail);
         updateIfNotNull(userDto.getPhone(), existingUser::setPhone);
@@ -77,9 +76,7 @@ public class UserService {
         updateIfNotNull(userDto.getRole(), existingUser::setRole);
         updateIfNotNull(userDto.getProfilePictureUrl(), existingUser::setProfilePictureUrl);
 
-        // Handle password update with validation
         if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
-            // Validate current password before updating
             if (userDto.getCurrentPassword() == null || userDto.getCurrentPassword().isEmpty()) {
                 throw new IllegalArgumentException("Current password is required to update password");
             }
@@ -88,7 +85,6 @@ public class UserService {
                 throw new IllegalArgumentException("Current password is incorrect");
             }
 
-            // If validation passes, update to new password
             existingUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
         }
 
