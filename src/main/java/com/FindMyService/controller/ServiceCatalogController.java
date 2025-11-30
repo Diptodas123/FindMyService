@@ -37,7 +37,6 @@ public class ServiceCatalogController {
     }
 
     @GetMapping("/provider/{providerId}")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('PROVIDER')")
     public ResponseEntity<?> getServicesByProvider(@PathVariable Long providerId) {
         try {
             ownerCheck.verifyOwner(providerId);
