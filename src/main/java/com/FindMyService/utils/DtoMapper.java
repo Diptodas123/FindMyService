@@ -1,8 +1,10 @@
 package com.FindMyService.utils;
 
+import com.FindMyService.model.ServiceCatalog;
 import com.FindMyService.model.User;
 import com.FindMyService.model.Provider;
 import com.FindMyService.model.dto.ProviderDto;
+import com.FindMyService.model.dto.ServiceCatalogDto;
 import com.FindMyService.model.dto.UserDto;
 import com.FindMyService.model.enums.Role;
 
@@ -43,6 +45,41 @@ public final class DtoMapper {
                 .zipCode(provider.getZipCode())
                 .createdAt(provider.getCreatedAt())
                 .avgRating(provider.getAvgRating())
+                .build();
+    }
+
+    public static ServiceCatalogDto toDto(ServiceCatalog service) {
+        if (service == null) return null;
+        return ServiceCatalogDto.builder()
+                .serviceId(service.getServiceId())
+                .providerId(service.getProviderId() != null ? service.getProviderId().getProviderId() : null)
+                .providerName(service.getProviderId() != null ? service.getProviderId().getProviderName() : null)
+                .serviceName(service.getServiceName())
+                .description(service.getDescription())
+                .cost(service.getCost())
+                .location(service.getLocation())
+                .availability(service.getAvailability())
+                .warrantyPeriodMonths(service.getWarrantyPeriodMonths())
+                .imageUrl(service.getImageUrl())
+                .createdAt(service.getCreatedAt())
+                .updatedAt(service.getUpdatedAt())
+                .active(service.isActive())
+                .avgRating(service.getAvgRating())
+                .totalRatings(service.getTotalRatings())
+                .build();
+    }
+
+    public static ServiceCatalog toEntity(ServiceCatalogDto dto, Provider provider) {
+        return ServiceCatalog.builder()
+                .providerId(provider)
+                .serviceName(dto.getServiceName())
+                .description(dto.getDescription())
+                .cost(dto.getCost())
+                .location(dto.getLocation())
+                .availability(dto.getAvailability())
+                .warrantyPeriodMonths(dto.getWarrantyPeriodMonths())
+                .imageUrl(dto.getImageUrl())
+                .active(dto.getActive() != null ? dto.getActive() : true)
                 .build();
     }
 }

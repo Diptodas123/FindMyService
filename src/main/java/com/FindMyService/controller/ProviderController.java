@@ -4,7 +4,7 @@ import com.FindMyService.model.Provider;
 import com.FindMyService.model.dto.ProviderDto;
 import com.FindMyService.service.ProviderService;
 import com.FindMyService.utils.DtoMapper;
-import com.FindMyService.utils.ErrorResponseBuilder;
+import com.FindMyService.utils.ResponseBuilder;
 import com.FindMyService.utils.OwnerCheck;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -44,14 +44,14 @@ public class ProviderController {
         } catch (AccessDeniedException ex) {
             return ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
-                    .body(ErrorResponseBuilder.forbidden("You are not authorized to access this provider"));
+                    .body(ResponseBuilder.forbidden("You are not authorized to access this provider"));
         }
         return providerService.getProviderById(providerId)
                 .map(DtoMapper::toDto)
                 .map(dto -> ResponseEntity.ok((Object) dto))
                 .orElseGet(() -> ResponseEntity
                         .status(HttpStatus.NOT_FOUND)
-                        .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "Provider not found")));
+                        .body(ResponseBuilder.build(HttpStatus.NOT_FOUND, "Provider not found")));
     }
 
     @PostMapping
@@ -60,18 +60,26 @@ public class ProviderController {
         return providerService.createProvider(provider);
     }
 
-    @PutMapping("/{providerId}")
+    @PatchMapping("/{providerId}")
     @PreAuthorize("hasAuthority('PROVIDER') or hasAuthority('ADMIN')")
-    public ResponseEntity<?> updateProvider(@PathVariable Long providerId, @RequestBody Provider provider) {
+    public ResponseEntity<?> updateProvider(@PathVariable Long providerId, @RequestBody ProviderDto providerDto) {
         try {
             ownerCheck.verifyOwner(providerId);
+            ProviderDto updatedProvider = providerService.updateProvider(providerId, providerDto);
+            return ResponseEntity.ok(updatedProvider);
         } catch (AccessDeniedException ex) {
             return ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
-                    .body(ErrorResponseBuilder.forbidden("You are not authorized to update this provider"));
+                    .body(ResponseBuilder.forbidden("You are not authorized to update this provider"));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(ResponseBuilder.notFound(ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ResponseBuilder.internalServerError("Failed to update provider: " + ex.getMessage()));
         }
-
-        return providerService.updateProvider(providerId, provider);
     }
 
     @DeleteMapping("/{providerId}")
@@ -79,18 +87,20 @@ public class ProviderController {
     public ResponseEntity<?> deleteProvider(@PathVariable Long providerId) {
         try {
             ownerCheck.verifyOwner(providerId);
+            providerService.deleteProvider(providerId);
+            return ResponseEntity.ok(ResponseBuilder.ok("Provider deleted successfully"));
         } catch (AccessDeniedException ex) {
             return ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
-                    .body(ErrorResponseBuilder.forbidden("You are not authorized to delete this provider"));
+                    .body(ResponseBuilder.forbidden("You are not authorized to delete this provider"));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(ResponseBuilder.notFound(ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ResponseBuilder.internalServerError("Failed to delete provider: " + ex.getMessage()));
         }
-
-        boolean deleted = providerService.deleteProvider(providerId);
-        if (deleted) {
-            return ResponseEntity.ok(ErrorResponseBuilder.ok("Provider deleted successfully"));
-        }
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "Provider not found"));
     }
 }

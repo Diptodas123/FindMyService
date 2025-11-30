@@ -7,7 +7,7 @@ import com.FindMyService.model.enums.OrderStatus;
 import com.FindMyService.repository.OrderRepository;
 import com.FindMyService.repository.ProviderRepository;
 import com.FindMyService.repository.UserRepository;
-import com.FindMyService.utils.ErrorResponseBuilder;
+import com.FindMyService.utils.ResponseBuilder;
 import com.stripe.model.PaymentIntent;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,14 +52,14 @@ public class OrderService {
         if (user.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "User from payload not found"));
+                    .body(ResponseBuilder.build(HttpStatus.BAD_REQUEST, "User from payload not found"));
         }
 
         Optional<Provider> provider = providerRepository.findById(order.getProviderId().getProviderId());
         if (provider.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Provider from payload not found"));
+                    .body(ResponseBuilder.build(HttpStatus.BAD_REQUEST, "Provider from payload not found"));
         }
 
         order.setOrderStatus(REQUESTED);
@@ -81,7 +81,7 @@ public class OrderService {
         if (user.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "User not found"));
+                    .body(ResponseBuilder.build(HttpStatus.NOT_FOUND, "User not found"));
         }
 
         List<Order> orders = orderRepository.findByUserId(user.get());
@@ -93,7 +93,7 @@ public class OrderService {
         if (provider.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "Provider not found"));
+                    .body(ResponseBuilder.build(HttpStatus.NOT_FOUND, "Provider not found"));
         }
 
         List<Order> orders = orderRepository.findByProviderId(provider.get());
@@ -106,7 +106,7 @@ public class OrderService {
         if (order.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "Order not found"));
+                    .body(ResponseBuilder.build(HttpStatus.NOT_FOUND, "Order not found"));
         }
 
         Order existing = order.get();
@@ -116,7 +116,7 @@ public class OrderService {
                 existing.getOrderStatus() == OrderStatus.PAID) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Cannot initiate payment for this order"));
+                    .body(ResponseBuilder.build(HttpStatus.BAD_REQUEST, "Cannot initiate payment for this order"));
         }
 
         try {
@@ -138,7 +138,7 @@ public class OrderService {
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ErrorResponseBuilder.serverError("Payment initiation failed: " + e.getMessage()));
+                    .body(ResponseBuilder.serverError("Payment initiation failed: " + e.getMessage()));
         }
     }
 
@@ -148,7 +148,7 @@ public class OrderService {
         if (order.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "Order not found"));
+                    .body(ResponseBuilder.build(HttpStatus.NOT_FOUND, "Order not found"));
         }
 
         Order existing = order.get();
@@ -164,13 +164,13 @@ public class OrderService {
             } else {
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
-                        .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST,
+                        .body(ResponseBuilder.build(HttpStatus.BAD_REQUEST,
                                 "Payment not successful. Status: " + paymentIntent.getStatus()));
             }
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ErrorResponseBuilder.serverError("Payment confirmation failed: " + e.getMessage()));
+                    .body(ResponseBuilder.serverError("Payment confirmation failed: " + e.getMessage()));
         }
     }
 
@@ -180,13 +180,13 @@ public class OrderService {
         if (order.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "Order not found"));
+                    .body(ResponseBuilder.build(HttpStatus.NOT_FOUND, "Order not found"));
         }
 
         if (newStatus == null) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Status cannot be null"));
+                    .body(ResponseBuilder.build(HttpStatus.BAD_REQUEST, "Status cannot be null"));
         }
 
         Order existing = order.get();

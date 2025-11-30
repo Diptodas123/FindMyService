@@ -1,8 +1,10 @@
 package com.FindMyService.service;
 
 import com.FindMyService.model.Provider;
+import com.FindMyService.model.dto.ProviderDto;
 import com.FindMyService.repository.ProviderRepository;
-import com.FindMyService.utils.ErrorResponseBuilder;
+import com.FindMyService.utils.DtoMapper;
+import com.FindMyService.utils.ResponseBuilder;
 import com.FindMyService.utils.OwnerCheck;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,13 +39,13 @@ public class ProviderService {
         if (provider.getEmail() == null || provider.getEmail().isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Email is required"));
+                    .body(ResponseBuilder.build(HttpStatus.BAD_REQUEST, "Email is required"));
         }
 
         if (provider.getPassword() == null || provider.getPassword().isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(ErrorResponseBuilder.build(HttpStatus.BAD_REQUEST, "Password is required"));
+                    .body(ResponseBuilder.build(HttpStatus.BAD_REQUEST, "Password is required"));
         }
 
         try {
@@ -53,40 +55,42 @@ public class ProviderService {
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ErrorResponseBuilder.serverError("Failed to create provider: " + e.getMessage()));
+                    .body(ResponseBuilder.serverError("Failed to create provider: " + e.getMessage()));
         }
     }
 
     @Transactional
-    public ResponseEntity<?> updateProvider(Long providerId, Provider provider) {
-        Optional<Provider> existingProvider = providerRepository.findById(providerId);
-        if (existingProvider.isEmpty()) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponseBuilder.build(HttpStatus.NOT_FOUND, "Provider not found"));
+    public ProviderDto updateProvider(Long providerId, ProviderDto providerDto) {
+        Provider existingProvider = providerRepository.findById(providerId)
+                .orElseThrow(() -> new IllegalArgumentException("Provider not found with id: " + providerId));
+
+        updateIfNotNull(providerDto.getProviderName(), existingProvider::setProviderName);
+        updateIfNotNull(providerDto.getEmail(), existingProvider::setEmail);
+        updateIfNotNull(providerDto.getPhone(), existingProvider::setPhone);
+        updateIfNotNull(providerDto.getAddressLine1(), existingProvider::setAddressLine1);
+        updateIfNotNull(providerDto.getAddressLine2(), existingProvider::setAddressLine2);
+        updateIfNotNull(providerDto.getCity(), existingProvider::setCity);
+        updateIfNotNull(providerDto.getState(), existingProvider::setState);
+        updateIfNotNull(providerDto.getZipCode(), existingProvider::setZipCode);
+
+        if (providerDto.getPassword() != null && !providerDto.getPassword().isEmpty()) {
+            existingProvider.setPassword(passwordEncoder.encode(providerDto.getPassword()));
         }
 
-        try {
-            provider.setProviderId(providerId);
-            if (provider.getPassword() != null && !provider.getPassword().isEmpty()) {
-                provider.setPassword(passwordEncoder.encode(provider.getPassword()));
-            } else {
-                provider.setPassword(existingProvider.get().getPassword());
-            }
-            Provider updated = providerRepository.save(provider);
-            return ResponseEntity.ok(updated);
-        } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ErrorResponseBuilder.serverError("Failed to update provider: " + e.getMessage()));
-        }
+        Provider updated = providerRepository.save(existingProvider);
+        return DtoMapper.toDto(updated);
     }
 
     @Transactional
-    public boolean deleteProvider(Long providerId) {
-        return providerRepository.findById(providerId).map(provider -> {
-            providerRepository.delete(provider);
-            return true;
-        }).orElse(false);
+    public void deleteProvider(Long providerId) {
+        Provider provider = providerRepository.findById(providerId)
+                .orElseThrow(() -> new IllegalArgumentException("Provider not found with id: " + providerId));
+        providerRepository.delete(provider);
+    }
+
+    private <T> void updateIfNotNull(T value, java.util.function.Consumer<T> setter) {
+        if (value != null) {
+            setter.accept(value);
+        }
     }
 }
