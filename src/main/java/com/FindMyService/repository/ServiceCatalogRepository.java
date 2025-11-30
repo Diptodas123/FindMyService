@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface ServiceCatalogRepository extends JpaRepository<ServiceCatalog, Long> {
-    List<ServiceCatalog> findByProviderId(Long providerId);
+    List<ServiceCatalog> findByProviderId_ProviderId(Long providerId);
 }

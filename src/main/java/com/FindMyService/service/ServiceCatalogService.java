@@ -38,7 +38,7 @@ public class ServiceCatalogService {
         if (!providerRepository.existsById(providerId)) {
             return List.of();
         }
-        return serviceCatalogRepository.findByProviderId(providerId);
+        return serviceCatalogRepository.findByProviderId_ProviderId(providerId);
     }
 
     @Transactional
